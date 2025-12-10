@@ -18,6 +18,14 @@ const CategoryCard : React.FC<CategoryProps> =  ({ name, color, onPress }) => {
 export default CategoryCard
 
 const styles = StyleSheet.create({
-    card: {},
-    text: {}
+    card: {
+        padding: 25,
+        borderRadius: 18,
+        marginBottom: 15,
+    },
+    text: {
+        fontSize: 22,
+        fontWeight: '600',
+        color: '#333'
+    }
 })
