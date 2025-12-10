@@ -1,3 +1,4 @@
+import CategoryCard from "@/src/components/CategoryCard";
 import { Text, View } from "react-native";
 
 export default function Index() {
@@ -9,7 +10,6 @@ export default function Index() {
         alignItems: "center",
       }}
     >
-      <Text>hi</Text>
     </View>
   );
 }
