@@ -1,4 +1,4 @@
-import CategoryScreen from "@/src/screens/CategoryScreen";
+import CreateNotes from "@/src/screens/CreateNotes";
 import { Text, View } from "react-native";
 
 export default function Index() {
@@ -10,7 +10,7 @@ export default function Index() {
         alignItems: "center",
       }}
     >
-      <CategoryScreen/>
+      <CreateNotes/>
     </View>
   );
 }

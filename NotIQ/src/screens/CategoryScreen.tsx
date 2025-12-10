@@ -10,7 +10,7 @@ const CategoryScreen = ({route, navigation}) => {
     <View style={styles.container}>
      <View style={styles.header}>
       <TouchableOpacity onPress={() => navigation.goBack()}>
-        <Ionicons name='chevron-back' size={28} color='#6a00ff'/>
+        <Ionicons name='arrow-back' size={28} color='#6a00ff'/>
       </TouchableOpacity>
       <Text style={styles.title}>Work</Text>
      </View>
