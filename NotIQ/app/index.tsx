@@ -1,4 +1,4 @@
-import Home from "@/src/screens/Home";
+import CategoryScreen from "@/src/screens/CategoryScreen";
 import { Text, View } from "react-native";
 
 export default function Index() {
@@ -10,7 +10,7 @@ export default function Index() {
         alignItems: "center",
       }}
     >
-      <Home/>
+      <CategoryScreen/>
     </View>
   );
 }

@@ -4,32 +4,32 @@ import React from 'react'
 export interface NoteCardProps {
   title: string;
   text: string;
-  date: Date;
+  date?: string;
 }
 
-// Helper function to get "time ago"
-const timeAgo = (date: Date) => {
-  const now = new Date();
-  const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+// // Helper function to get "time ago"
+// const timeAgo = (date: Date) => {
+// //   const now = new Date();
+// //   const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
 
-  const intervals: { [key: string]: number } = {
-    year: 31536000,
-    month: 2592000,
-    week: 604800,
-    day: 86400,
-    hour: 3600,
-    minute: 60,
-    second: 1,
-  };
+// //   const intervals: { [key: string]: number } = {
+// //     year: 31536000,
+// //     month: 2592000,
+// //     week: 604800,
+// //     day: 86400,
+// //     hour: 3600,
+// //     minute: 60,
+// //     second: 1,
+// //   };
 
-  for (const i in intervals) {
-    const interval = Math.floor(seconds / intervals[i]);
-    if (interval >= 1) {
-      return `${interval} ${i}${interval > 1 ? "s" : ""} ago`;
-    }
-  }
-  return "just now";
-};
+// //   for (const i in intervals) {
+// //     const interval = Math.floor(seconds / intervals[i]);
+// //     if (interval >= 1) {
+// //       return `${interval} ${i}${interval > 1 ? "s" : ""} ago`;
+// //     }
+// //   }
+// //   return "just now";
+// // };
 
 const NoteCard: React.FC<NoteCardProps> = ({ title, text, date }) => {
   return (
@@ -38,7 +38,7 @@ const NoteCard: React.FC<NoteCardProps> = ({ title, text, date }) => {
       <Text style={styles.description} numberOfLines={2}>
         {text}
       </Text>
-      <Text style={styles.date}>{timeAgo(date)}</Text>
+      <Text style={styles.date}>{date}</Text>
     </View>
   );
 };
