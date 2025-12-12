@@ -241,7 +241,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 28,
     fontWeight: "700",
-    color: COLORS.textDark,
+    color: COLORS.primary,
   },
 
   profileButton: {
