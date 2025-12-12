@@ -10,6 +10,8 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  Modal,
+  TouchableWithoutFeedback,
 } from "react-native";
 import { MotiView } from "moti";
 import { useNotes } from "../../context/NotesContext";
@@ -38,6 +40,7 @@ export default function AllNotesScreen() {
   const [filteredNotes, setFilteredNotes] = useState(notes);
   const [sortBy, setSortBy] = useState<"dateAdded" | "dateEdited">("dateAdded");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+  const [filterVisible, setFilterVisible] = useState(false);
 
   useEffect(() => {
     const sorted = sortNotes(sortBy, sortOrder);
@@ -77,7 +80,7 @@ export default function AllNotesScreen() {
   };
 
   const getCatColor = (cat: string) =>
-    CATEGORY_COLORS[cat.toLowerCase()] || CATEGORY_COLORS.other;
+    CATEGORY_COLORS[cat.toLowerCase()] || "#CCC";
 
   const renderNote = ({ item, index }: any) => (
     <MotiView
@@ -87,7 +90,7 @@ export default function AllNotesScreen() {
       style={{ flex: 1 }}
     >
       <TouchableOpacity
-        style={ styles.noteCard }
+        style={styles.noteCard}
         onPress={() => router.push(`/edit-note?id=${item.id}`)}
       >
         {/* Top Icon */}
@@ -141,71 +144,83 @@ export default function AllNotesScreen() {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>NotIQ</Text>
+        <View style={styles.headerRow}>
+          <Text style={styles.headerTitle}>NotIQ</Text>
 
-        <TouchableOpacity
-          style={styles.profileButton}
-          onPress={() => router.push("/profile")}
-        >
-          <Ionicons name="person" size={22} color={COLORS.white} />
-        </TouchableOpacity>
-      </View>
-
-      <TextInput
-        style={styles.searchInput}
-        placeholder="Search notes..."
-        placeholderTextColor="#a8a0c2"
-        value={searchQuery}
-        onChangeText={setSearchQuery}
-      />
-
-      {/* Sorting */}
-      <View style={styles.sortContainer}>
-        <TouchableOpacity
-          style={[
-            styles.sortButton,
-            sortBy === "dateAdded" && styles.sortActive,
-          ]}
-          onPress={() => setSortBy("dateAdded")}
-        >
-          <Text
-            style={[
-              styles.sortText,
-              sortBy === "dateAdded" && styles.sortTextActive,
-            ]}
+          <TouchableOpacity
+            style={styles.profileButton}
+            onPress={() => router.push("/profile")}
           >
-            Date Added
-          </Text>
-        </TouchableOpacity>
+            <Ionicons
+              name="person-circle-outline"
+              size={32}
+              color={COLORS.primary}
+            />
+          </TouchableOpacity>
+        </View>
 
-        <TouchableOpacity
-          style={[
-            styles.sortButton,
-            sortBy === "dateEdited" && styles.sortActive,
-          ]}
-          onPress={() => setSortBy("dateEdited")}
-        >
-          <Text
-            style={[
-              styles.sortText,
-              sortBy === "dateEdited" && styles.sortTextActive,
-            ]}
-          >
-            Date Edited
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.orderButton}
-          onPress={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
-        >
-          <Ionicons
-            name={sortOrder === "asc" ? "arrow-up" : "arrow-down"}
-            size={20}
-            color={COLORS.primary}
+        {/* Search + Filter */}
+        <View style={styles.searchRow}>
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search notes..."
+            placeholderTextColor={COLORS.textLight}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
           />
-        </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.filterButton}
+            onPress={() => setFilterVisible(true)}
+          >
+            <Ionicons name="filter-outline" size={20} color={COLORS.primary} />
+            <Text style={styles.filterText}>Sort</Text>
+          </TouchableOpacity>
+        </View>
       </View>
+
+      {/* Filter Modal */}
+      <Modal
+        visible={filterVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setFilterVisible(false)}
+      >
+        <TouchableWithoutFeedback onPress={() => setFilterVisible(false)}>
+          <View style={styles.modalOverlay} />
+        </TouchableWithoutFeedback>
+        <View style={styles.modalContent}>
+          <Text style={styles.modalTitle}>Sort Notes</Text>
+          <TouchableOpacity
+            style={styles.modalOption}
+            onPress={() => {
+              setSortBy("dateAdded");
+              setFilterVisible(false);
+            }}
+          >
+            <Text style={styles.modalOptionText}>Date Added</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.modalOption}
+            onPress={() => {
+              setSortBy("dateEdited");
+              setFilterVisible(false);
+            }}
+          >
+            <Text style={styles.modalOptionText}>Date Edited</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.modalOption}
+            onPress={() => {
+              setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+              setFilterVisible(false);
+            }}
+          >
+            <Text style={styles.modalOptionText}>
+              Order: {sortOrder === "asc" ? "Ascending" : "Descending"}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
 
       {/* Notes List */}
       <FlatList
@@ -230,80 +245,50 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.bg },
   loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
 
-  header: {
-    paddingHorizontal: 20,
-    paddingVertical: 15,
+  header: { paddingHorizontal: 20, paddingTop: 20, paddingBottom: 10 },
+  headerRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    marginBottom: 12,
   },
-
-  headerTitle: {
-    fontSize: 28,
-    fontWeight: "700",
-    color: COLORS.primary,
-  },
-
+  headerTitle: { fontSize: 28, fontWeight: "700", color: COLORS.primary },
   profileButton: {
-    backgroundColor: COLORS.primary,
+    backgroundColor: COLORS.primary + "20",
     width: 42,
     height: 42,
     borderRadius: 21,
     justifyContent: "center",
     alignItems: "center",
-    shadowColor: COLORS.primary,
-    shadowOpacity: 0.4,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 3 },
-    elevation: 4,
   },
 
+  searchRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
   searchInput: {
+    flex: 1,
     backgroundColor: COLORS.white,
-    marginHorizontal: 20,
-    padding: 14,
+    padding: 12,
     borderRadius: 12,
     fontSize: 16,
-    marginBottom: 10,
     borderWidth: 1,
     borderColor: "#E6DFFD",
   },
-
-  sortContainer: {
+  filterButton: {
     flexDirection: "row",
-    gap: 10,
-    paddingHorizontal: 20,
-    marginBottom: 10,
-  },
-
-  sortButton: {
-    flex: 1,
+    alignItems: "center",
+    paddingHorizontal: 12,
     paddingVertical: 8,
-    backgroundColor: "#ECE6FF",
-    borderRadius: 10,
+    backgroundColor: COLORS.primaryLight + "20",
+    borderRadius: 12,
+    marginLeft: 8,
   },
-
-  sortActive: {
-    backgroundColor: COLORS.primary,
-  },
-
-  sortText: {
-    textAlign: "center",
-    color: COLORS.textLight,
+  filterText: {
+    marginLeft: 6,
+    color: COLORS.primary,
     fontWeight: "600",
-    fontSize: 13,
-  },
-
-  sortTextActive: {
-    color: COLORS.white,
-  },
-
-  orderButton: {
-    padding: 10,
-    backgroundColor: COLORS.white,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: "#ddd",
   },
 
   noteCard: {
@@ -319,66 +304,20 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     elevation: 3,
   },
-
-  noteHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 8,
-    gap: 8,
-  },
-
   noteTitle: {
     fontSize: 17,
     fontWeight: "700",
     color: COLORS.textDark,
     marginBottom: 4,
   },
-
-  categoryBadge: {
-    backgroundColor: "#00000033",
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 8,
-  },
-
   categoryDot: {
     width: 12,
     height: 12,
     borderRadius: 6,
-    backgroundColor: "#00000055",
     marginTop: 4,
     marginBottom: 6,
   },
-
-  noteDateSmall: {
-    fontSize: 12,
-    color: COLORS.textLight,
-    marginTop: 4,
-  },
-
-  categoryText: {
-    color: COLORS.white,
-    fontSize: 12,
-    fontWeight: "600",
-  },
-
-  noteContent: {
-    fontSize: 15,
-    color: COLORS.textDark,
-    marginBottom: 10,
-  },
-
-  noteFooter: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-
-  noteDate: {
-    fontSize: 12,
-    color: COLORS.textLight,
-  },
-
+  noteDateSmall: { fontSize: 12, color: COLORS.textLight, marginTop: 4 },
   deleteBtn: {
     position: "absolute",
     bottom: 10,
@@ -399,4 +338,23 @@ const styles = StyleSheet.create({
     alignItems: "center",
     elevation: 6,
   },
+
+  modalOverlay: { flex: 1, backgroundColor: "#00000050" },
+  modalContent: {
+    position: "absolute",
+    top: "30%",
+    left: "10%",
+    right: "10%",
+    backgroundColor: COLORS.white,
+    borderRadius: 12,
+    padding: 20,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 12,
+    color: COLORS.textDark,
+  },
+  modalOption: { paddingVertical: 10 },
+  modalOptionText: { fontSize: 16, color: COLORS.textDark },
 });

@@ -1,36 +1,54 @@
-import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    FlatList,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View
-} from 'react-native';
-import { useNotes } from '../../context/NotesContext';
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+  Modal,
+  TouchableWithoutFeedback,
+} from "react-native";
+import { useNotes } from "../../context/NotesContext";
 
-export default function StudyNotesScreen() {
+const COLORS = {
+  primary: "#9B5DE5",
+  primaryLight: "#B98AF1",
+  bg: "#F7F3FF",
+  white: "#FFFFFF",
+  textDark: "#37304D",
+  textLight: "#7A7297",
+};
+
+export default function StudyScreen() {
   const { notes, isLoading, deleteNote, sortNotes } = useNotes();
   const router = useRouter();
   const [studyNotes, setStudyNotes] = useState(notes);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [filteredNotes, setFilteredNotes] = useState(studyNotes);
-  const [sortBy, setSortBy] = useState<'dateAdded' | 'dateEdited'>('dateAdded');
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [sortBy, setSortBy] = useState<"dateAdded" | "dateEdited">("dateAdded");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+  const [filterVisible, setFilterVisible] = useState(false);
 
   useEffect(() => {
-    const study = notes.filter(note => note.category.toLowerCase() === 'study');
-    const sorted = sortNotes(sortBy, sortOrder).filter(note => note.category.toLowerCase() === 'study');
+    const study = notes.filter(
+      (note) => note.category.toLowerCase() === "study"
+    );
+    const sorted = sortNotes(sortBy, sortOrder).filter(
+      (note) => note.category.toLowerCase() === "study"
+    );
     setStudyNotes(sorted);
-    
+
     if (searchQuery) {
-      const filtered = sorted.filter(note => 
-        (note.title && note.title.toLowerCase().includes(searchQuery.toLowerCase())) ||
-        note.content.toLowerCase().includes(searchQuery.toLowerCase())
+      const filtered = sorted.filter(
+        (note) =>
+          (note.title &&
+            note.title.toLowerCase().includes(searchQuery.toLowerCase())) ||
+          note.content.toLowerCase().includes(searchQuery.toLowerCase())
       );
       setFilteredNotes(filtered);
     } else {
@@ -40,18 +58,26 @@ export default function StudyNotesScreen() {
 
   const handleDeleteNote = (noteId: string, noteTitle: string) => {
     Alert.alert(
-      'Delete Note',
-      `Are you sure you want to delete "${noteTitle || 'Untitled'}"?`,
+      "Delete Note",
+      `Are you sure you want to delete "${noteTitle || "Untitled"}"?`,
       [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Delete', style: 'destructive', onPress: () => deleteNote(noteId) }
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: () => deleteNote(noteId),
+        },
       ]
     );
   };
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return (
+      date.toLocaleDateString() +
+      " " +
+      date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+    );
   };
 
   const renderNote = ({ item }: { item: any }) => (
@@ -61,9 +87,11 @@ export default function StudyNotesScreen() {
     >
       <View style={styles.noteHeader}>
         <Text style={styles.noteTitle} numberOfLines={1}>
-          {item.title || 'Untitled'}
+          {item.title || "Untitled"}
         </Text>
-        <View style={styles.categoryBadge}>
+        <View
+          style={[styles.categoryBadge, { backgroundColor: COLORS.primary }]}
+        >
           <Text style={styles.categoryText}>Study</Text>
         </View>
       </View>
@@ -72,7 +100,9 @@ export default function StudyNotesScreen() {
       </Text>
       <View style={styles.noteFooter}>
         <Text style={styles.noteDate}>
-          {item.dateEdited ? 'Edited: ' + formatDate(item.dateEdited) : 'Added: ' + formatDate(item.dateAdded)}
+          {item.dateEdited
+            ? "Edited: " + formatDate(item.dateEdited)
+            : "Added: " + formatDate(item.dateAdded)}
         </Text>
         <TouchableOpacity
           style={styles.deleteButton}
@@ -87,7 +117,7 @@ export default function StudyNotesScreen() {
   if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#007AFF" />
+        <ActivityIndicator size="large" color={COLORS.primary} />
       </View>
     );
   }
@@ -95,14 +125,79 @@ export default function StudyNotesScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Study Notes</Text>
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Search study notes..."
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-        />
+        <View style={styles.headerRow}>
+          <Text style={styles.headerTitle}>Study</Text>
+          <TouchableOpacity
+            style={styles.profileButton}
+            onPress={() => router.push("/profile")}
+          >
+            <Ionicons
+              name="person-circle-outline"
+              size={32}
+              color={COLORS.primary}
+            />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.searchRow}>
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search study notes..."
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            placeholderTextColor={COLORS.textLight}
+          />
+          <TouchableOpacity
+            style={styles.filterButton}
+            onPress={() => setFilterVisible(true)}
+          >
+            <Ionicons name="filter-outline" size={20} color={COLORS.primary} />
+            <Text style={styles.filterText}>Sort</Text>
+          </TouchableOpacity>
+        </View>
       </View>
+
+      <Modal
+        visible={filterVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setFilterVisible(false)}
+      >
+        <TouchableWithoutFeedback onPress={() => setFilterVisible(false)}>
+          <View style={styles.modalOverlay} />
+        </TouchableWithoutFeedback>
+        <View style={styles.modalContent}>
+          <Text style={styles.modalTitle}>Sort Notes</Text>
+          <TouchableOpacity
+            style={styles.modalOption}
+            onPress={() => {
+              setSortBy("dateAdded");
+              setFilterVisible(false);
+            }}
+          >
+            <Text style={styles.modalOptionText}>Date Added</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.modalOption}
+            onPress={() => {
+              setSortBy("dateEdited");
+              setFilterVisible(false);
+            }}
+          >
+            <Text style={styles.modalOptionText}>Date Edited</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.modalOption}
+            onPress={() => {
+              setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+              setFilterVisible(false);
+            }}
+          >
+            <Text style={styles.modalOptionText}>
+              Order: {sortOrder === "asc" ? "Ascending" : "Descending"}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
 
       <FlatList
         data={filteredNotes}
@@ -111,9 +206,11 @@ export default function StudyNotesScreen() {
         contentContainerStyle={styles.notesList}
         ListEmptyComponent={
           <View style={styles.emptyState}>
-            <Ionicons name="book-outline" size={64} color="#ccc" />
+            <Ionicons name="book-outline" size={64} color={COLORS.textLight} />
             <Text style={styles.emptyText}>
-              {searchQuery ? 'No study notes found' : 'No study notes yet. Create your first study note!'}
+              {searchQuery
+                ? "No study notes found"
+                : "No study notes yet. Create your first study note!"}
             </Text>
           </View>
         }
@@ -121,123 +218,131 @@ export default function StudyNotesScreen() {
 
       <TouchableOpacity
         style={styles.addButton}
-        onPress={() => router.push('/add-note')}
+        onPress={() => router.push("/add-note")}
       >
-        <Ionicons name="add" size={24} color="white" />
+        <Ionicons name="add" size={28} color={COLORS.white} />
       </TouchableOpacity>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
+  container: { flex: 1, backgroundColor: COLORS.bg },
+  loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
+
+  header: { padding: 20 },
+  headerRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 12,
   },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  header: {
-    backgroundColor: 'white',
-    padding: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 15,
-  },
+  headerTitle: { fontSize: 24, fontWeight: "bold", color: COLORS.primary },
+  profileButton: {},
+
+  searchRow: { flexDirection: "row", alignItems: "center", marginTop: 8 },
   searchInput: {
+    flex: 1,
     borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
+    borderColor: "#ddd",
+    borderRadius: 12,
     padding: 12,
     fontSize: 16,
-    backgroundColor: '#f9f9f9',
+    backgroundColor: COLORS.primaryLight + "20",
+    color: COLORS.textDark,
   },
-  notesList: {
-    padding: 15,
-  },
+  filterButton: { flexDirection: "row", alignItems: "center", marginLeft: 12 },
+  filterText: { marginLeft: 6, color: COLORS.primary, fontWeight: "600" },
+
+  notesList: { padding: 15 },
   noteCard: {
-    backgroundColor: 'white',
+    backgroundColor: COLORS.white,
     padding: 15,
-    marginBottom: 10,
-    borderRadius: 8,
-    shadowColor: '#000',
+    marginBottom: 12,
+    borderRadius: 12,
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+    shadowRadius: 3,
+    elevation: 3,
   },
   noteHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 6,
   },
   noteTitle: {
     fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
+    fontWeight: "600",
+    color: COLORS.textDark,
     flex: 1,
   },
   categoryBadge: {
-    backgroundColor: '#34C759',
-    paddingHorizontal: 8,
+    paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: 12,
+    borderRadius: 16,
   },
-  categoryText: {
-    color: 'white',
-    fontSize: 12,
-    fontWeight: '500',
-  },
+  categoryText: { color: COLORS.white, fontSize: 12, fontWeight: "500" },
   noteContent: {
     fontSize: 14,
-    color: '#666',
+    color: COLORS.textLight,
     lineHeight: 20,
     marginBottom: 10,
   },
   noteFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
-  noteDate: {
-    fontSize: 12,
-    color: '#999',
-  },
-  deleteButton: {
-    padding: 5,
-  },
+  noteDate: { fontSize: 12, color: COLORS.textLight },
+  deleteButton: { padding: 5 },
+
   addButton: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 30,
     right: 30,
-    backgroundColor: '#007AFF',
+    backgroundColor: COLORS.primary,
     width: 56,
     height: 56,
     borderRadius: 28,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.25,
     shadowRadius: 4,
-    elevation: 4,
+    elevation: 5,
   },
+
   emptyState: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 50,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 60,
   },
   emptyText: {
     fontSize: 16,
-    color: '#999',
+    color: COLORS.textLight,
     marginTop: 15,
+    textAlign: "center",
   },
+
+  modalOverlay: { flex: 1, backgroundColor: "#00000050" },
+  modalContent: {
+    position: "absolute",
+    top: "30%",
+    left: "10%",
+    right: "10%",
+    backgroundColor: COLORS.white,
+    borderRadius: 12,
+    padding: 20,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 12,
+    color: COLORS.textDark,
+  },
+  modalOption: { paddingVertical: 10 },
+  modalOptionText: { fontSize: 16, color: COLORS.textDark },
 });
