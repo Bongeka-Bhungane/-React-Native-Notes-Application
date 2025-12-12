@@ -18,8 +18,8 @@ export default function IndexScreen() {
   }, [user, isLoading, router]);
 
   return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <ActivityIndicator size="large" color="#007AFF" />
+    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+      <ActivityIndicator size="large" color="#37304D" />
     </View>
   );
 }

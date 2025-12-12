@@ -1,89 +1,104 @@
-import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import { useRouter } from "expo-router";
+import React, { useState } from "react";
 import {
-    Alert,
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View
-} from 'react-native';
-import { useNotes } from '../context/NotesContext';
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { Picker } from "@react-native-picker/picker";
+import { useNotes } from "../context/NotesContext";
 
-const categories = ['Work', 'Study', 'Personal'];
+const COLORS = {
+  primary: "#9B5DE5",
+  primaryLight: "#B98AF1",
+  bg: "#F7F3FF",
+  white: "#FFFFFF",
+  textDark: "#37304D",
+  textLight: "#7A7297",
+};
+
+const categories = ["Work", "Study", "Personal", "Ideas"];
 
 export default function AddNoteScreen() {
-  const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
-  const [category, setCategory] = useState('Work');
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
+  const [category, setCategory] = useState(""); // default empty -> "Select"
   const [isLoading, setIsLoading] = useState(false);
   const { addNote } = useNotes();
   const router = useRouter();
 
   const handleSave = async () => {
+    if (!category) {
+      Alert.alert("Error", "Please select a category");
+      return;
+    }
+
     if (!content.trim()) {
-      Alert.alert('Error', 'Please enter note content');
+      Alert.alert("Error", "Please enter note content");
       return;
     }
 
     setIsLoading(true);
     try {
       await addNote(title.trim() || undefined, content.trim(), category);
-      Alert.alert('Success', 'Note added successfully!', [
-        { text: 'OK', onPress: () => router.back() }
+      Alert.alert("Success", "Note added successfully!", [
+        { text: "OK", onPress: () => router.back() },
       ]);
     } catch (error) {
-      Alert.alert('Error', 'Failed to add note. Please try again.');
+      Alert.alert("Error", "Failed to add note. Please try again.");
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <KeyboardAvoidingView 
-      style={styles.container} 
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
-      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+      >
         <View style={styles.form}>
           <Text style={styles.label}>Title (Optional)</Text>
           <TextInput
             style={styles.titleInput}
             placeholder="Enter note title..."
+            placeholderTextColor={COLORS.textLight}
             value={title}
             onChangeText={setTitle}
             editable={!isLoading}
           />
 
           <Text style={styles.label}>Category</Text>
-          <View style={styles.categoryContainer}>
-            {categories.map((cat) => (
-              <TouchableOpacity
-                key={cat}
-                style={[
-                  styles.categoryButton,
-                  category === cat && styles.categoryButtonActive
-                ]}
-                onPress={() => setCategory(cat)}
-                disabled={isLoading}
-              >
-                <Text style={[
-                  styles.categoryButtonText,
-                  category === cat && styles.categoryButtonTextActive
-                ]}>
-                  {cat}
-                </Text>
-              </TouchableOpacity>
-            ))}
+          <View style={styles.dropdownContainer}>
+            <Picker
+              selectedValue={category}
+              onValueChange={(itemValue) => setCategory(itemValue)}
+              enabled={!isLoading}
+              dropdownIconColor={COLORS.primary}
+              style={styles.picker}
+            >
+              {/* Default "Select" option */}
+              <Picker.Item label="Select" value="" color={COLORS.textLight} />
+              {categories.map((cat) => (
+                <Picker.Item label={cat} value={cat} key={cat} />
+              ))}
+            </Picker>
           </View>
 
           <Text style={styles.label}>Content *</Text>
           <TextInput
             style={styles.contentInput}
             placeholder="Enter your note content..."
+            placeholderTextColor={COLORS.textLight}
             value={content}
             onChangeText={setContent}
             multiline
@@ -99,14 +114,14 @@ export default function AddNoteScreen() {
             >
               <Text style={styles.cancelButtonText}>Cancel</Text>
             </TouchableOpacity>
-            
+
             <TouchableOpacity
               style={[styles.saveButton, isLoading && styles.buttonDisabled]}
               onPress={handleSave}
               disabled={isLoading}
             >
               <Text style={styles.saveButtonText}>
-                {isLoading ? 'Saving...' : 'Save Note'}
+                {isLoading ? "Saving..." : "Save Note"}
               </Text>
             </TouchableOpacity>
           </View>
@@ -119,104 +134,86 @@ export default function AddNoteScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: COLORS.bg,
   },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    padding: 20,
-  },
+  scrollView: { flex: 1 },
+  scrollContent: { padding: 20 },
   form: {
-    backgroundColor: 'white',
-    padding: 20,
-    borderRadius: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    backgroundColor: COLORS.white,
+    padding: 22,
+    borderRadius: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 4,
   },
   label: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
+    fontWeight: "600",
+    color: COLORS.textDark,
     marginBottom: 8,
   },
   titleInput: {
     borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    padding: 15,
+    borderColor: "#E6DFFD",
+    borderRadius: 14,
+    padding: 14,
     fontSize: 16,
-    backgroundColor: '#f9f9f9',
+    backgroundColor: COLORS.bg,
     marginBottom: 20,
   },
-  categoryContainer: {
-    flexDirection: 'row',
-    marginBottom: 20,
-    gap: 10,
-  },
-  categoryButton: {
-    flex: 1,
-    padding: 12,
-    borderRadius: 8,
+  dropdownContainer: {
     borderWidth: 1,
-    borderColor: '#ddd',
-    backgroundColor: '#f9f9f9',
-    alignItems: 'center',
+    borderColor: "#E6DFFD",
+    borderRadius: 14,
+    backgroundColor: COLORS.bg,
+    marginBottom: 20,
+    overflow: "hidden",
   },
-  categoryButtonActive: {
-    backgroundColor: '#007AFF',
-    borderColor: '#007AFF',
-  },
-  categoryButtonText: {
-    fontSize: 14,
-    color: '#666',
-    fontWeight: '500',
-  },
-  categoryButtonTextActive: {
-    color: 'white',
+  picker: {
+    height: 50,
+    color: COLORS.textDark,
   },
   contentInput: {
     borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    padding: 15,
+    borderColor: "#E6DFFD",
+    borderRadius: 14,
+    padding: 16,
     fontSize: 16,
-    backgroundColor: '#f9f9f9',
-    minHeight: 200,
-    marginBottom: 20,
+    backgroundColor: COLORS.bg,
+    minHeight: 220,
+    marginBottom: 24,
   },
   actions: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 15,
   },
   cancelButton: {
     flex: 1,
-    padding: 15,
-    borderRadius: 8,
+    padding: 16,
+    borderRadius: 14,
     borderWidth: 1,
-    borderColor: '#ddd',
-    alignItems: 'center',
-    backgroundColor: '#f9f9f9',
+    borderColor: "#E6DFFD",
+    alignItems: "center",
+    backgroundColor: COLORS.bg,
   },
   cancelButtonText: {
     fontSize: 16,
-    color: '#666',
-    fontWeight: '600',
+    color: COLORS.textLight,
+    fontWeight: "600",
   },
   saveButton: {
     flex: 2,
-    padding: 15,
-    borderRadius: 8,
-    backgroundColor: '#007AFF',
-    alignItems: 'center',
+    padding: 16,
+    borderRadius: 14,
+    backgroundColor: COLORS.primary,
+    alignItems: "center",
   },
   saveButtonText: {
     fontSize: 16,
-    color: 'white',
-    fontWeight: '600',
+    color: COLORS.white,
+    fontWeight: "600",
   },
   buttonDisabled: {
     opacity: 0.6,
