@@ -1,48 +1,70 @@
-import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+import React, { useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View
-} from 'react-native';
-import { useAuth } from '../context/AuthContext';
+  ActivityIndicator,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { useAuth } from "../context/AuthContext";
+
+const COLORS = {
+  primary: "#9B5DE5",
+  primaryLight: "#B98AF1",
+  bg: "#F7F3FF",
+  white: "#FFFFFF",
+  textDark: "#37304D",
+  textLight: "#7A7297",
+  danger: "#FF3B30",
+};
 
 export default function ProfileScreen() {
   const { user, logout, updateProfile } = useAuth();
   const router = useRouter();
-  
-  const [email, setEmail] = useState(user?.email || '');
-  const [username, setUsername] = useState(user?.username || '');
-  const [currentPassword, setCurrentPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+
+  const [email, setEmail] = useState(user?.email || "");
+  const [username, setUsername] = useState(user?.username || "");
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [activeSection, setActiveSection] = useState<'profile' | 'password'>('profile');
+  const [activeForm, setActiveForm] = useState<"none" | "profile" | "password">(
+    "none"
+  );
 
   const handleUpdateProfile = async () => {
     if (!username.trim()) {
-      Alert.alert('Error', 'Username is required');
+      Alert.alert("Error", "Username is required");
       return;
     }
 
     setIsLoading(true);
     try {
-      const success = await updateProfile(email.trim(), undefined, username.trim());
+      const success = await updateProfile(
+        email.trim(),
+        undefined,
+        username.trim()
+      );
       if (success) {
-        Alert.alert('Success', 'Profile updated successfully!');
+        Alert.alert("Success", "Profile updated successfully!");
+        setActiveForm("none");
       } else {
-        Alert.alert('Error', email !== user?.email ? 'Email already exists' : 'Failed to update profile');
+        Alert.alert(
+          "Error",
+          email !== user?.email
+            ? "Email already exists"
+            : "Failed to update profile"
+        );
       }
-    } catch (error) {
-      Alert.alert('Error', 'Failed to update profile. Please try again.');
+    } catch {
+      Alert.alert("Error", "Failed to update profile. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -50,17 +72,17 @@ export default function ProfileScreen() {
 
   const handleChangePassword = async () => {
     if (!currentPassword.trim() || !newPassword.trim()) {
-      Alert.alert('Error', 'Please fill in all password fields');
+      Alert.alert("Error", "Please fill in all password fields");
       return;
     }
 
     if (newPassword.length < 6) {
-      Alert.alert('Error', 'New password must be at least 6 characters long');
+      Alert.alert("Error", "New password must be at least 6 characters");
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      Alert.alert('Error', 'New passwords do not match');
+      Alert.alert("Error", "Passwords do not match");
       return;
     }
 
@@ -68,72 +90,75 @@ export default function ProfileScreen() {
     try {
       const success = await updateProfile(undefined, newPassword, undefined);
       if (success) {
-        Alert.alert('Success', 'Password changed successfully!');
-        setCurrentPassword('');
-        setNewPassword('');
-        setConfirmPassword('');
+        Alert.alert("Success", "Password changed successfully!");
+        setCurrentPassword("");
+        setNewPassword("");
+        setConfirmPassword("");
+        setActiveForm("none");
       } else {
-        Alert.alert('Error', 'Failed to change password');
+        Alert.alert("Error", "Failed to change password");
       }
-    } catch (error) {
-      Alert.alert('Error', 'Failed to change password. Please try again.');
+    } catch {
+      Alert.alert("Error", "Failed to change password. Please try again.");
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleLogout = () => {
-    Alert.alert(
-      'Logout',
-      'Are you sure you want to logout?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Logout', 
-          style: 'destructive',
-          onPress: async () => {
-            await logout();
-            router.replace('/auth/login');
-          }
-        }
-      ]
-    );
+    Alert.alert("Logout", "Are you sure you want to logout?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Logout",
+        style: "destructive",
+        onPress: async () => {
+          await logout();
+          router.replace("/auth/login");
+        },
+      },
+    ]);
   };
 
   return (
-    <KeyboardAvoidingView 
-      style={styles.container} 
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
-      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+      >
+        {/* Profile Header */}
         <View style={styles.profileHeader}>
           <View style={styles.avatarContainer}>
-            <Ionicons name="person" size={64} color="#007AFF" />
+            <Ionicons name="person" size={64} color={COLORS.primary} />
           </View>
           <Text style={styles.username}>{user?.username}</Text>
           <Text style={styles.email}>{user?.email}</Text>
         </View>
 
-        <View style={styles.sectionSelector}>
+        {/* Action Buttons */}
+        <View style={styles.actionButtons}>
           <TouchableOpacity
-            style={[styles.sectionButton, activeSection === 'profile' && styles.sectionButtonActive]}
-            onPress={() => setActiveSection('profile')}
+            style={styles.mainButton}
+            onPress={() =>
+              setActiveForm(activeForm === "profile" ? "none" : "profile")
+            }
           >
-            <Text style={[styles.sectionButtonText, activeSection === 'profile' && styles.sectionButtonTextActive]}>
-              Profile Info
-            </Text>
+            <Text style={styles.mainButtonText}>Edit Profile</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.sectionButton, activeSection === 'password' && styles.sectionButtonActive]}
-            onPress={() => setActiveSection('password')}
+            style={styles.mainButton}
+            onPress={() =>
+              setActiveForm(activeForm === "password" ? "none" : "password")
+            }
           >
-            <Text style={[styles.sectionButtonText, activeSection === 'password' && styles.sectionButtonTextActive]}>
-              Change Password
-            </Text>
+            <Text style={styles.mainButtonText}>Change Password</Text>
           </TouchableOpacity>
         </View>
 
-        {activeSection === 'profile' && (
+        {/* Profile Form */}
+        {activeForm === "profile" && (
           <View style={styles.form}>
             <Text style={styles.label}>Username</Text>
             <TextInput
@@ -154,20 +179,21 @@ export default function ProfileScreen() {
             />
 
             <TouchableOpacity
-              style={[styles.button, isLoading && styles.buttonDisabled]}
+              style={[styles.submitButton, isLoading && styles.buttonDisabled]}
               onPress={handleUpdateProfile}
               disabled={isLoading}
             >
               {isLoading ? (
-                <ActivityIndicator size="small" color="white" />
+                <ActivityIndicator size="small" color={COLORS.white} />
               ) : (
-                <Text style={styles.buttonText}>Update Profile</Text>
+                <Text style={styles.submitButtonText}>Save Changes</Text>
               )}
             </TouchableOpacity>
           </View>
         )}
 
-        {activeSection === 'password' && (
+        {/* Password Form */}
+        {activeForm === "password" && (
           <View style={styles.form}>
             <Text style={styles.label}>Current Password</Text>
             <TextInput
@@ -197,24 +223,22 @@ export default function ProfileScreen() {
             />
 
             <TouchableOpacity
-              style={[styles.button, isLoading && styles.buttonDisabled]}
+              style={[styles.submitButton, isLoading && styles.buttonDisabled]}
               onPress={handleChangePassword}
               disabled={isLoading}
             >
               {isLoading ? (
-                <ActivityIndicator size="small" color="white" />
+                <ActivityIndicator size="small" color={COLORS.white} />
               ) : (
-                <Text style={styles.buttonText}>Change Password</Text>
+                <Text style={styles.submitButtonText}>Change Password</Text>
               )}
             </TouchableOpacity>
           </View>
         )}
 
-        <TouchableOpacity
-          style={styles.logoutButton}
-          onPress={handleLogout}
-        >
-          <Ionicons name="log-out-outline" size={20} color="#FF3B30" />
+        {/* Logout Button */}
+        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+          <Ionicons name="log-out-outline" size={20} color={COLORS.danger} />
           <Text style={styles.logoutButtonText}>Logout</Text>
         </TouchableOpacity>
       </ScrollView>
@@ -223,132 +247,106 @@ export default function ProfileScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    padding: 20,
-  },
+  container: { flex: 1, backgroundColor: COLORS.bg },
+  scrollView: { flex: 1 },
+  scrollContent: { padding: 20 },
+
   profileHeader: {
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 30,
     padding: 20,
-    backgroundColor: 'white',
-    borderRadius: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    backgroundColor: COLORS.white,
+    borderRadius: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 4,
   },
   avatarContainer: {
     width: 100,
     height: 100,
     borderRadius: 50,
-    backgroundColor: '#f0f0f0',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "#F0EFFF",
+    justifyContent: "center",
+    alignItems: "center",
     marginBottom: 15,
   },
   username: {
     fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
+    fontWeight: "700",
+    color: COLORS.textDark,
     marginBottom: 5,
   },
-  email: {
-    fontSize: 16,
-    color: '#666',
-  },
-  sectionSelector: {
-    flexDirection: 'row',
-    backgroundColor: 'white',
-    borderRadius: 10,
+  email: { fontSize: 16, color: COLORS.textLight },
+
+  actionButtons: {
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginBottom: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    gap: 12,
   },
-  sectionButton: {
+  mainButton: {
     flex: 1,
-    padding: 15,
-    alignItems: 'center',
+    padding: 16,
+    backgroundColor: COLORS.primary,
+    borderRadius: 14,
+    alignItems: "center",
   },
-  sectionButtonActive: {
-    backgroundColor: '#007AFF',
-    borderRadius: 10,
-  },
-  sectionButtonText: {
-    fontSize: 16,
-    color: '#666',
-    fontWeight: '500',
-  },
-  sectionButtonTextActive: {
-    color: 'white',
-  },
+  mainButtonText: { color: COLORS.white, fontWeight: "600", fontSize: 16 },
+
   form: {
-    backgroundColor: 'white',
-    padding: 20,
-    borderRadius: 10,
+    backgroundColor: COLORS.white,
+    padding: 22,
+    borderRadius: 16,
     marginBottom: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 10,
     elevation: 3,
   },
   label: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
+    fontWeight: "600",
+    color: COLORS.textDark,
     marginBottom: 8,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    padding: 15,
+    borderColor: "#E6DFFD",
+    borderRadius: 14,
+    padding: 16,
     fontSize: 16,
-    backgroundColor: '#f9f9f9',
+    backgroundColor: COLORS.bg,
     marginBottom: 20,
   },
-  button: {
-    backgroundColor: '#007AFF',
-    padding: 15,
-    borderRadius: 8,
-    alignItems: 'center',
+  submitButton: {
+    backgroundColor: COLORS.primary,
+    padding: 16,
+    borderRadius: 14,
+    alignItems: "center",
   },
-  buttonDisabled: {
-    backgroundColor: '#ccc',
-  },
-  buttonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '600',
-  },
+  submitButtonText: { color: COLORS.white, fontSize: 16, fontWeight: "600" },
+  buttonDisabled: { opacity: 0.6 },
+
   logoutButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'white',
-    padding: 15,
-    borderRadius: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: COLORS.white,
+    padding: 16,
+    borderRadius: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 10,
     elevation: 3,
   },
   logoutButtonText: {
-    color: '#FF3B30',
+    color: COLORS.danger,
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
     marginLeft: 8,
   },
 });
