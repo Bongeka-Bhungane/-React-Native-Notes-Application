@@ -28,7 +28,6 @@ const CATEGORY_COLORS: any = {
   study: "#4DD4AC",
   personal: "#FF6B6B",
   ideas: "#8AB4F8",
-  other: "#C4C4C4",
 };
 
 export default function AllNotesScreen() {
@@ -82,54 +81,50 @@ export default function AllNotesScreen() {
 
   const renderNote = ({ item, index }: any) => (
     <MotiView
-      from={{ opacity: 0, translateY: 20, rotate: "-2deg" }}
-      animate={{
-        opacity: 1,
-        translateY: 0,
-        rotate: index % 2 === 0 ? "-1deg" : "1deg",
-      }}
+      from={{ opacity: 0, translateY: 20 }}
+      animate={{ opacity: 1, translateY: 0 }}
       transition={{ delay: index * 120, damping: 12 }}
+      style={{ flex: 1 }}
     >
       <TouchableOpacity
-        style={[
-          styles.noteCard,
-          { backgroundColor: getCatColor(item.category) },
-        ]}
+        style={ styles.noteCard }
         onPress={() => router.push(`/edit-note?id=${item.id}`)}
       >
-        <View style={styles.noteHeader}>
-          <Ionicons
-            name="document-text-outline"
-            size={22}
-            color={COLORS.textDark}
-          />
+        {/* Top Icon */}
+        <Ionicons
+          name="document-text-outline"
+          size={26}
+          color="#4A4458"
+          style={{ marginBottom: 6 }}
+        />
 
-          <Text style={styles.noteTitle} numberOfLines={1}>
-            {item.title || "Untitled"}
-          </Text>
-
-          <View style={styles.categoryBadge}>
-            <Text style={styles.categoryText}>{item.category}</Text>
-          </View>
-        </View>
-
-        <Text style={styles.noteContent} numberOfLines={3}>
-          {item.content}
+        {/* Title */}
+        <Text style={styles.noteTitle} numberOfLines={2}>
+          {item.title || "Untitled"}
         </Text>
 
-        <View style={styles.noteFooter}>
-          <Text style={styles.noteDate}>
-            {item.dateEdited
-              ? `Edited: ${formatDate(item.dateEdited)}`
-              : `Added: ${formatDate(item.dateAdded)}`}
-          </Text>
+        {/* Category Dot */}
+        <View
+          style={[
+            styles.categoryDot,
+            { backgroundColor: getCatColor(item.category) },
+          ]}
+        />
 
-          <TouchableOpacity
-            onPress={() => handleDeleteNote(item.id, item.title)}
-          >
-            <Ionicons name="trash" size={20} color="#B00020" />
-          </TouchableOpacity>
-        </View>
+        {/* Date */}
+        <Text style={styles.noteDateSmall}>
+          {item.dateEdited
+            ? `Edited • ${formatDate(item.dateEdited)}`
+            : `Added • ${formatDate(item.dateAdded)}`}
+        </Text>
+
+        {/* Delete Button */}
+        <TouchableOpacity
+          style={styles.deleteBtn}
+          onPress={() => handleDeleteNote(item.id, item.title)}
+        >
+          <Ionicons name="trash" size={22} color="#B00020" />
+        </TouchableOpacity>
       </TouchableOpacity>
     </MotiView>
   );
@@ -146,7 +141,7 @@ export default function AllNotesScreen() {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>All Notes</Text>
+        <Text style={styles.headerTitle}>NotIQ</Text>
 
         <TouchableOpacity
           style={styles.profileButton}
@@ -312,16 +307,17 @@ const styles = StyleSheet.create({
   },
 
   noteCard: {
+    height: 170,
+    borderRadius: 22,
     padding: 16,
-    borderRadius: 10,
     marginBottom: 20,
+    justifyContent: "flex-start",
     backgroundColor: COLORS.white,
     shadowColor: "#000",
-    shadowOpacity: 0.15,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
     elevation: 3,
-    transform: [{ rotate: "-1deg" }], // sticky note feel
   },
 
   noteHeader: {
@@ -332,10 +328,10 @@ const styles = StyleSheet.create({
   },
 
   noteTitle: {
-    flex: 1,
-    fontSize: 18,
+    fontSize: 17,
     fontWeight: "700",
     color: COLORS.textDark,
+    marginBottom: 4,
   },
 
   categoryBadge: {
@@ -343,6 +339,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 8,
+  },
+
+  categoryDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: "#00000055",
+    marginTop: 4,
+    marginBottom: 6,
+  },
+
+  noteDateSmall: {
+    fontSize: 12,
+    color: COLORS.textLight,
+    marginTop: 4,
   },
 
   categoryText: {
@@ -366,6 +377,14 @@ const styles = StyleSheet.create({
   noteDate: {
     fontSize: 12,
     color: COLORS.textLight,
+  },
+
+  deleteBtn: {
+    position: "absolute",
+    bottom: 10,
+    right: 10,
+    padding: 6,
+    borderRadius: 12,
   },
 
   addButton: {

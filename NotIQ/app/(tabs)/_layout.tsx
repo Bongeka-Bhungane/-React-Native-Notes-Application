@@ -8,7 +8,7 @@ export default function TabLayout() {
     <ProtectedRoute>
       <Tabs
         screenOptions={{
-          tabBarActiveTintColor: '#007AFF',
+          tabBarActiveTintColor: '#b692dbff',
           tabBarInactiveTintColor: 'gray',
           tabBarStyle: {
             backgroundColor: 'white',
@@ -48,6 +48,15 @@ export default function TabLayout() {
             title: 'Personal',
             tabBarIcon: ({ color, size }) => (
               <Ionicons name="person" size={size} color={color} />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="ideas"
+          options={{
+            title: 'Ideas',
+            tabBarIcon: ({ color, size }) => (
+              <Ionicons name="bulb" size={size} color={color} />
             ),
           }}
         />
